@@ -1,10 +1,6 @@
-all: wc mmwc
-
-wc: wc.c
-
-mmwc: mmwc.c
+all: wc mmwc pwd ls cat
 
 clean:
-	rm -f wc mmwc
+	rm -f wc mmwc pwd ls cat
 
 .PHONY: all clean
