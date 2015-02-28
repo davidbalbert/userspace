@@ -1,6 +1,8 @@
-all: wc mmwc pwd ls cat
+PROGS = wc mmwc pwd ls cat
+
+all: $(PROGS)
 
 clean:
-	rm -f wc mmwc pwd ls cat
+	rm -f $(PROGS)
 
 .PHONY: all clean
