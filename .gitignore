@@ -3,3 +3,6 @@ mmwc
 cat
 ls
 pwd
+sh
+
+*.dSYM

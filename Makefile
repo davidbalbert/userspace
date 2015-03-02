@@ -1,4 +1,5 @@
-PROGS = wc mmwc pwd ls cat
+PROGS = wc mmwc pwd ls cat sh
+CFLAGS = -g
 
 all: $(PROGS)
 
