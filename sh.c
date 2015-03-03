@@ -160,19 +160,21 @@ parse_command(char *s)
         return c;
 }
 
-void
-expand_path(Command *c)
+char *
+find_program(Command *c)
 {
         char *program = c->argv[0];
 
-        if (program[0] == '/') {
-                return;
+        if (program[0] == '/' && access(program, F_OK) == 0) {
+                return program;
         }
 
         char *path = getenv("PATH");
 
-        if (path == NULL) {
-                return;
+        if (path == NULL && strstr(program, "/") != NULL && access(program, F_OK) == 0) {
+                return program;
+        } else if (path == NULL) {
+                return NULL;
         }
 
         path = strdup(path);
@@ -184,22 +186,26 @@ expand_path(Command *c)
         char *dirname, *s = path;
 
         while ((dirname = strsep(&s, ":")) != NULL) {
-                // dirname + "/" + command + \0
+                // dirname + '/' + command + '\0'
                 size_t len = strlen(dirname) + 1 + strlen(program) + 1;
                 char *fname = calloc(len, sizeof(char));
 
                 snprintf(fname, len, "%s/%s", dirname, program);
 
                 if (access(fname, F_OK) == 0) {
-                        free(c->argv[0]);
-                        c->argv[0] = fname;
-                        break;
+                        return fname;
                 }
 
                 free(fname);
         }
 
         free(path);
+
+        if (strstr(program, "/") != NULL && access(program, F_OK) == 0) {
+                return program;
+        } else {
+                return NULL;
+        }
 }
 
 void
@@ -245,7 +251,12 @@ run(Command *c)
                 return;
         }
 
-        expand_path(c);
+        char *fname = find_program(c);
+
+        if (fname == NULL) {
+                fprintf(stderr, "%s: command not found\n", c->argv[0]);
+                return;
+        }
 
         pid_t pid = fork();
 
@@ -254,9 +265,9 @@ run(Command *c)
                 waitpid(pid, &stat_loc, 0);
         } else {
                 char **envp = { NULL };
-                execve(c->argv[0], c->argv, envp);
+                execve(fname, c->argv, envp);
 
-                // we only get here if there was an error
+                // we only get here if there was an error running fname
                 err(127, "%s", c->argv[0]);
         }
 }
