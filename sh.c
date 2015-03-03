@@ -263,6 +263,7 @@ run(Command *c)
         if (pid) {
                 int stat_loc = 0;
                 waitpid(pid, &stat_loc, 0);
+                free(fname);
         } else {
                 char **envp = { NULL };
                 execve(fname, c->argv, envp);
