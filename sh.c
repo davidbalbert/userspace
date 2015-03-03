@@ -163,6 +163,23 @@ parse_command(char *s)
 void
 run(Command *c)
 {
+        if (strcmp(c->argv[0], "exit") == 0) {
+                if (c->argv[1]) {
+                        char *end;
+                        int status = strtol(c->argv[1], &end, 10);
+
+                        if (*end != '\0') {
+                                fprintf(stderr, "%s is not a number\n", c->argv[1]);
+                                exit(255);
+                        }
+
+                        exit(status);
+                } else {
+                        exit(0);
+                }
+        }
+
+
         pid_t pid = fork();
 
         if (pid) {
