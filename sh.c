@@ -130,7 +130,7 @@ get_line(char *buf, size_t size)
 Command *
 parse_command(char *s)
 {
-        Command *c = malloc(sizeof(Command));
+        Command *c = calloc(1, sizeof(Command));
 
         if (c == NULL) {
                 warn("Couldn't allocate Command");
@@ -186,7 +186,7 @@ expand_path(Command *c)
         while ((dirname = strsep(&s, ":")) != NULL) {
                 // dirname + "/" + command + \0
                 size_t len = strlen(dirname) + 1 + strlen(program) + 1;
-                char *fname = malloc(len * sizeof(char));
+                char *fname = calloc(len, sizeof(char));
 
                 snprintf(fname, len, "%s/%s", dirname, program);
 
