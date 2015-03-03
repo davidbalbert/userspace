@@ -177,6 +177,27 @@ run(Command *c)
                 } else {
                         exit(0);
                 }
+        } else if (strcmp(c->argv[0], "cd") == 0) {
+                char *path;
+
+                if (c->argv[1]) {
+                        path = c->argv[1];
+                } else {
+                        path = getenv("HOME");
+
+                        if (path == NULL) {
+                                fprintf(stderr, "cd: HOME not set");
+                                return;
+                        }
+                }
+
+                printf("chdir(\"%s\")\n", path);
+
+                if (chdir(path) == -1) {
+                        warn("cd %s", path);
+                }
+
+                return;
         }
 
 
