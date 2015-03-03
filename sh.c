@@ -166,12 +166,24 @@ find_program(Command *c)
         char *program = c->argv[0];
 
         if (program[0] == '/' && access(program, F_OK) == 0) {
+                program = strdup(program);
+
+                if (program == NULL) {
+                        err(1, "Couldn't strdup program");
+                }
+
                 return program;
         }
 
         char *path = getenv("PATH");
 
         if (path == NULL && strstr(program, "/") != NULL && access(program, F_OK) == 0) {
+                program = strdup(program);
+
+                if (program == NULL) {
+                        err(1, "Couldn't strdup program");
+                }
+
                 return program;
         } else if (path == NULL) {
                 return NULL;
@@ -202,6 +214,12 @@ find_program(Command *c)
         free(path);
 
         if (strstr(program, "/") != NULL && access(program, F_OK) == 0) {
+                program = strdup(program);
+
+                if (program == NULL) {
+                        err(1, "Couldn't strdup program");
+                }
+
                 return program;
         } else {
                 return NULL;
