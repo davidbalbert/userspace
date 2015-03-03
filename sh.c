@@ -161,8 +161,55 @@ parse_command(char *s)
 }
 
 void
+expand_path(Command *c)
+{
+        char *program = c->argv[0];
+
+        if (program[0] == '/') {
+                return;
+        }
+
+        char *path = getenv("PATH");
+
+        if (path == NULL) {
+                return;
+        }
+
+        path = strdup(path);
+
+        if (path == NULL) {
+                err(1, "Couldn't strdup path");
+        }
+
+        char *dirname, *s = path;
+
+        while ((dirname = strsep(&s, ":")) != NULL) {
+                // dirname + "/" + command + \0
+                size_t len = strlen(dirname) + 1 + strlen(program) + 1;
+                char *fname = malloc(len * sizeof(char));
+
+                snprintf(fname, len, "%s/%s", dirname, program);
+
+                if (access(fname, F_OK) == 0) {
+                        free(c->argv[0]);
+                        c->argv[0] = fname;
+                        break;
+                }
+
+                free(fname);
+        }
+
+        free(path);
+}
+
+void
 run(Command *c)
 {
+        if (c->argv[0] == NULL) {
+                // The user typed nothing
+                return;
+        }
+
         if (strcmp(c->argv[0], "exit") == 0) {
                 if (c->argv[1]) {
                         char *end;
@@ -191,8 +238,6 @@ run(Command *c)
                         }
                 }
 
-                printf("chdir(\"%s\")\n", path);
-
                 if (chdir(path) == -1) {
                         warn("cd %s", path);
                 }
@@ -200,6 +245,7 @@ run(Command *c)
                 return;
         }
 
+        expand_path(c);
 
         pid_t pid = fork();
 
@@ -209,6 +255,9 @@ run(Command *c)
         } else {
                 char **envp = { NULL };
                 execve(c->argv[0], c->argv, envp);
+
+                // we only get here if there was an error
+                err(127, "%s", c->argv[0]);
         }
 }
 
