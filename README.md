@@ -1,6 +1,6 @@
-# wc
+# Some userspace Unix utilities
 
-Two implementations of `wc`. One uses `read(2)`, the other uses `mmap(2)`. Neither of them count words. Both count bytes and lines.
+Some basic, totally incompatible implementations of various Unix userspace utilities just for fun. `Mmwc` is `wc` implemented with `mmap(2)`.
 
 ## License
 
